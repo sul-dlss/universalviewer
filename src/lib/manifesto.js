@@ -1,4 +1,4 @@
-// manifesto v2.1.3 https://github.com/viewdir/manifesto
+// manifesto v2.1.4 https://github.com/viewdir/manifesto
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.manifesto = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 ///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/>   
@@ -324,10 +324,18 @@ var Manifesto;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         // todo: use getters when ES3 target is no longer required.
+        ResourceType.prototype.choice = function () {
+            return new ResourceType(ResourceType.CHOICE.toString());
+        };
         ResourceType.prototype.image = function () {
             return new ResourceType(ResourceType.IMAGE.toString());
         };
+        ResourceType.prototype.text = function () {
+            return new ResourceType(ResourceType.TEXT.toString());
+        };
+        ResourceType.CHOICE = new ResourceType("choice");
         ResourceType.IMAGE = new ResourceType("dctypes:image");
+        ResourceType.TEXT = new ResourceType("textualbody");
         return ResourceType;
     }(Manifesto.StringValue));
     Manifesto.ResourceType = ResourceType;
@@ -846,6 +854,9 @@ var Manifesto;
                 content.push(annotation);
             }
             return content;
+        };
+        Canvas.prototype.getDuration = function () {
+            return this.getProperty('duration');
         };
         Canvas.prototype.getImages = function () {
             var images = [];
@@ -2194,10 +2205,10 @@ var Manifesto;
                 request.end();
             });
         };
-        Utils.loadExternalResourcesAuth1 = function (resources, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
+        Utils.loadExternalResourcesAuth1 = function (resources, openContentProviderInteraction, openTokenService, getStoredAccessToken, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
             return new Promise(function (resolve, reject) {
                 var promises = resources.map(function (resource) {
-                    return Utils.loadExternalResourceAuth1(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages);
+                    return Utils.loadExternalResourceAuth1(resource, openContentProviderInteraction, openTokenService, getStoredAccessToken, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages);
                 });
                 Promise.all(promises)
                     .then(function () {
@@ -2207,19 +2218,41 @@ var Manifesto;
                 });
             });
         };
-        Utils.loadExternalResourceAuth1 = function (resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
+        Utils.loadExternalResourceAuth1 = function (resource, openContentProviderInteraction, openTokenService, getStoredAccessToken, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages) {
             return __awaiter(this, void 0, void 0, function () {
+                var storedAccessToken;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, resource.getData()];
+                        case 0: return [4 /*yield*/, getStoredAccessToken(resource)];
                         case 1:
-                            _a.sent();
-                            if (!(resource.status === HTTPStatusCode.MOVED_TEMPORARILY || resource.status === HTTPStatusCode.UNAUTHORIZED)) return [3 /*break*/, 3];
-                            return [4 /*yield*/, Utils.doAuthChain(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages)];
+                            storedAccessToken = _a.sent();
+                            if (!storedAccessToken) return [3 /*break*/, 6];
+                            return [4 /*yield*/, resource.getData(storedAccessToken)];
                         case 2:
                             _a.sent();
-                            _a.label = 3;
-                        case 3:
+                            if (!(resource.status === HTTPStatusCode.OK)) return [3 /*break*/, 3];
+                            return [2 /*return*/, resource];
+                        case 3: 
+                        // the stored token is no good for this resource
+                        return [4 /*yield*/, Utils.doAuthChain(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages)];
+                        case 4:
+                            // the stored token is no good for this resource
+                            _a.sent();
+                            _a.label = 5;
+                        case 5:
+                            if (resource.status === HTTPStatusCode.OK || resource.status === HTTPStatusCode.MOVED_TEMPORARILY) {
+                                return [2 /*return*/, resource];
+                            }
+                            throw Utils.createAuthorizationFailedError();
+                        case 6: return [4 /*yield*/, resource.getData()];
+                        case 7:
+                            _a.sent();
+                            if (!(resource.status === HTTPStatusCode.MOVED_TEMPORARILY || resource.status === HTTPStatusCode.UNAUTHORIZED)) return [3 /*break*/, 9];
+                            return [4 /*yield*/, Utils.doAuthChain(resource, openContentProviderInteraction, openTokenService, userInteractedWithContentProvider, getContentProviderInteraction, handleMovedTemporarily, showOutOfOptionsMessages)];
+                        case 8:
+                            _a.sent();
+                            _a.label = 9;
+                        case 9:
                             if (resource.status === HTTPStatusCode.OK || resource.status === HTTPStatusCode.MOVED_TEMPORARILY) {
                                 return [2 /*return*/, resource];
                             }
@@ -2348,7 +2381,7 @@ var Manifesto;
                         case 0:
                             tokenService = authService.getService(Manifesto.ServiceProfile.AUTH1TOKEN.toString());
                             if (!tokenService) return [3 /*break*/, 3];
-                            return [4 /*yield*/, openTokenService(tokenService)];
+                            return [4 /*yield*/, openTokenService(resource, tokenService)];
                         case 1:
                             tokenMessage = _a.sent();
                             if (!(tokenMessage && tokenMessage.accessToken)) return [3 /*break*/, 3];
