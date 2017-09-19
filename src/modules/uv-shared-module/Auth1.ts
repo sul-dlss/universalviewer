@@ -154,24 +154,7 @@ export class Auth1 {
                 resource.authHoldingPage.location.href = Auth1.getCookieServiceUrl(service);
                 resolve(resource.authHoldingPage);
 
-            } else {
-
-                $.publish(BaseEvents.SHOW_AUTH_DIALOGUE, [{
-                    service: service,
-                    closeCallback: () => {
-                        resolve(null);
-                    },
-                    confirmCallback: () => {
-                        const win: Window = Auth1.openContentProviderInteraction(service);
-                        resolve(win);
-                    },
-                    cancelCallback: () => {
-                        resolve(null);
-                    }
-                }]);
-
             }
-
         });
     }
 
