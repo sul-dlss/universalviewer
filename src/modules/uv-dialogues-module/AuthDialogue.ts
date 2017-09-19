@@ -38,12 +38,14 @@ export class AuthDialogue extends Dialogue {
             this.close();
         });
 
-        this.$title = $('<h1></h1>');
+        this.$title = $('<h1>Log In For Full Access</h1>');
         this.$content.append(this.$title);
 
         this.$content.append('\
             <div>\
-                <p class="message scroll"></p>\
+                <p class="message scroll">\
+                This object requires Stanford login to view in full detail.\
+                </p>\
             </div>'
         );
 
