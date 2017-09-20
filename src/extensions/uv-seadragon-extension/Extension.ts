@@ -897,8 +897,7 @@ export class Extension extends BaseExtension implements ISeadragonExtension {
 
     getEmbedScript(template: string, width: number, height: number, zoom: string, rotation: number): string {
         const appUri: string = this.getAppUri();
-        const iframeSrc: string = `${appUri.replace('/uv-3', '').replace('/uv.html', '')}
-          /iframe?url=${this.helper.iiifResourceUri.replace('/iiif/manifest', '')}`;
+        const iframeSrc: string = `${appUri.replace('/uv-3', '').replace('/uv.html', '')}/iframe?url=${this.helper.iiifResourceUri.replace('/iiif/manifest', '')}`;
         const script: string = String.format(template, iframeSrc, width, height);
         return script;
     }
