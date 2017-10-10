@@ -202,6 +202,8 @@ export class BaseExtension implements IExtension {
 
         $.subscribe(BaseEvents.CANVAS_INDEX_CHANGED, (e: any, canvasIndex: number) => {
             this.data.canvasIndex = canvasIndex;
+            this.lastCanvasIndex = this.helper.canvasIndex;
+            this.helper.canvasIndex = canvasIndex;
             this.fire(BaseEvents.CANVAS_INDEX_CHANGED, this.data.canvasIndex);
         });
 
@@ -717,16 +719,19 @@ export class BaseExtension implements IExtension {
 
     private _updateMetric(): void {
 
-        for (let i = 0; i < this.metrics.length; i++) {
-            const metric: Metric = this.metrics[i];
+        setTimeout(() => {
+            for (let i = 0; i < this.metrics.length; i++) {
+                const metric: Metric = this.metrics[i];
 
-            if (this.width() > metric.minWidth && this.width() <= metric.maxWidth) {
-                if (this.metric !== metric.type) {
-                    this.metric = metric.type;
-                    $.publish(BaseEvents.METRIC_CHANGED);
+                if (this.width() > metric.minWidth && this.width() <= metric.maxWidth) {
+                    if (this.metric !== metric.type) {
+                        this.metric = metric.type;
+
+                        $.publish(BaseEvents.METRIC_CHANGED);
+                    }
                 }
             }
-        }
+        }, 1);
     }
 
     resize(): void {
@@ -998,11 +1003,8 @@ export class BaseExtension implements IExtension {
 
         if (this.helper.isCanvasIndexOutOfRange(canvasIndex)) {
             this.showMessage(this.data.config.content.canvasIndexOutOfRange);
-            canvasIndex = 0;
+            return;
         }
-
-        this.lastCanvasIndex = this.helper.canvasIndex;
-        this.helper.canvasIndex = canvasIndex;
 
         $.publish(BaseEvents.OPEN_EXTERNAL_RESOURCE);
     }
