@@ -62,7 +62,7 @@ export class Extension extends BaseExtension implements ISeadragonExtension {
     create(): void {
         super.create();
 
-        $.subscribe(BaseEvents.METRIC_CHANGED, () => {         
+        $.subscribe(BaseEvents.METRIC_CHANGED, () => {
             if (!this.isDesktopMetric()) {
                 const settings: ISettings = {};
                 settings.pagingEnabled = false;
@@ -888,10 +888,8 @@ export class Extension extends BaseExtension implements ISeadragonExtension {
     }
 
     getEmbedScript(template: string, width: number, height: number, zoom: string, rotation: number): string {
-        const config: string = this.data.config.uri || '';
-        const locales: string = this.getSerializedLocales();
         const appUri: string = this.getAppUri();
-        const iframeSrc: string = `${appUri}#?manifest=${this.helper.iiifResourceUri}&c=${this.helper.collectionIndex}&m=${this.helper.manifestIndex}&s=${this.helper.sequenceIndex}&cv=${this.helper.canvasIndex}&config=${config}&locales=${locales}&xywh=${zoom}&r=${rotation}`;
+        const iframeSrc: string = `${appUri.replace('/uv-3', '').replace('/uv.html', '')}/iframe?url=${this.helper.iiifResourceUri.replace('/iiif/manifest', '')}`;
         const script: string = String.format(template, iframeSrc, width, height);
         return script;
     }
