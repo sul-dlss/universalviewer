@@ -627,27 +627,11 @@ export class FooterPanel extends BaseFooterPanel {
     }
 
     setPlacemarkerLabel(): void {
-
         const displaying: string = this.content.displaying;
         const index: number = this.extension.helper.canvasIndex;
+        const prefix: string = this.isPageModeEnabled ? this.content.page : this.content.image;
 
-        if (this.isPageModeEnabled()) {
-            const canvas: Manifesto.ICanvas = this.extension.helper.getCanvasByIndex(index);
-            let label: string | null = Manifesto.TranslationCollection.getValue(canvas.getLabel());
-
-            if (!label) {
-                label = this.content.defaultLabel;
-            }
-
-            const lastCanvasOrderLabel: string | null = this.extension.helper.getLastCanvasLabel(true);
-
-            if (lastCanvasOrderLabel) {
-                this.$pagePositionLabel.html(String.format(displaying, this.content.page, UVUtils.sanitize(<string>label), UVUtils.sanitize(<string>lastCanvasOrderLabel)));
-            }
-
-        } else {
-            this.$pagePositionLabel.html(String.format(displaying, this.content.image, index + 1, this.extension.helper.getTotalCanvases()));
-        }
+        this.$pagePositionLabel.html(String.format(displaying, prefix, index + 1, this.extension.helper.getTotalCanvases()));
     }
 
     isPageModeEnabled(): boolean {
