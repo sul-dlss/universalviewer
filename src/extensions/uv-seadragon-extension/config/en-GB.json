@@ -60,6 +60,9 @@
   "modules": {
     "contentLeftPanel": {
       "options": {
+        "autoExpandTreeEnabled": false,
+        "autoExpandTreeIfFewerThan": 20,
+        "branchNodesSelectable": false,
         "defaultToTreeEnabled": false,
         "defaultToTreeIfGreaterThan": 0,
         "elideCount": 40,
@@ -182,6 +185,7 @@
       "options": {
         "elideDetailsTermsCount": 20,
         "elideResultsTermsCount": 10,
+        "forceImageMode": false,
         "pageModeEnabled": true,
         "positionMarkerEnabled": true
       }

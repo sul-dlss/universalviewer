@@ -70,9 +70,10 @@
         "bookmark": "Add to bookmarks",
         "download": "Download",
         "embed": "Embed",
-        "feedback": "Feedback",
         "exitFullScreen": "Exit Full Screen",
+        "feedback": "Feedback",
         "fullScreen": "Full Screen",
+        "moreInfo": "More Information",
         "open": "Open",
         "share": "Share"
       }
@@ -85,6 +86,11 @@
         "ok": "OK",
         "pageNotFound": "This item does not contain a page with the number you entered. Try switching the numbering mode to 'image'.",
         "refresh": "Refresh"
+      }
+    },
+    "headerPanel": {
+      "content": {
+        "settings": "Settings"
       }
     },
     "helpDialogue": {
@@ -124,10 +130,14 @@
     },
     "avCenterPanel": {
       "content": {
-        "play": "Play",
-        "pause": "Pause",
         "currentTime": "Current Time",
-        "duration": "Duration"
+        "delimiter": " - ",
+        "duration": "Duration",
+        "mute": "Mute",
+        "next": "Next",
+        "pause": "Pause",
+        "play": "Play",
+        "previous": "Previous"
       }
     },
     "restrictedDialogue": {

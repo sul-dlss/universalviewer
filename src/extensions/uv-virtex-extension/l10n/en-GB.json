@@ -31,6 +31,7 @@
         "embed": "Embed",
         "exitFullScreen": "Exit Full Screen",
         "fullScreen": "Full Screen",
+        "moreInfo": "More Information",
         "open": "Open",
         "share": "Share"
       }
@@ -43,7 +44,8 @@
     "headerPanel": {
       "content": {
         "close": "Close",
-        "help": "Help"
+        "help": "Help",
+        "settings": "Settings"
       }
     },
     "helpDialogue": {
