@@ -655,6 +655,8 @@ export class BaseExtension implements IExtension {
 
                 if (range) {
                     $.publish(BaseEvents.RANGE_CHANGED, [range]);
+                } else {
+                    console.warn('range id not found:', this.data.rangeId);
                 }
             }
             
@@ -745,28 +747,34 @@ export class BaseExtension implements IExtension {
 
         setTimeout(() => {
 
-            let metricChanged: boolean = false;
+            // loop through all metrics
+            // find one that matches the current dimensions
+            // if a metric is found, and it's not the current metric, set it to be the current metric and publish a METRIC_CHANGED event
+            // if no metric is found, set MetricType.NONE to be the current metric and publish a METRIC_CHANGED event
+
+            let metricFound: boolean = false;
 
             for (let i = 0; i < this.metrics.length; i++) {
                 const metric: Metric = this.metrics[i];
 
-                // if the width and height is within this metric's defined range
+                // if the current width and height is within this metric's defined range
                 if (this.width() >= metric.minWidth && this.width() <= metric.maxWidth &&
                     this.height() >= metric.minHeight && this.height() <= metric.maxHeight) {
 
+                    metricFound = true;
+
                     if (this.metric !== metric.type) {
                         this.metric = metric.type;
-
-                        metricChanged = true;
-                        //console.log("metric changed", metric.type.toString());
-
                         $.publish(BaseEvents.METRIC_CHANGED);
                     }
                 }
             }
 
-            if (!metricChanged) {
-                this.metric = MetricType.NONE;
+            if (!metricFound) {
+                if (this.metric !== MetricType.NONE) {
+                    this.metric = MetricType.NONE;
+                    $.publish(BaseEvents.METRIC_CHANGED);
+                }
             }
         }, 1);
     }
@@ -1096,6 +1104,7 @@ export class BaseExtension implements IExtension {
         return this.metric.toString() === MetricType.DESKTOP.toString();
     }
 
+    // todo: use redux in manifold to get reset state
     viewManifest(manifest: Manifesto.IManifest): void {
         const data: IUVData = <IUVData>{};
         data.iiifResourceUri = this.helper.iiifResourceUri;
@@ -1107,6 +1116,7 @@ export class BaseExtension implements IExtension {
         this.reload(data);
     }
 
+    // todo: use redux in manifold to get reset state
     viewCollection(collection: Manifesto.ICollection): void {
         const data: IUVData = <IUVData>{};
         data.iiifResourceUri = this.helper.iiifResourceUri;
