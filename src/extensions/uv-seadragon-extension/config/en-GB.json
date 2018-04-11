@@ -35,7 +35,7 @@
         "type": "desktop",
         "minWidth": 800,
         "maxWidth": 100000,
-        "minHeight": 640,
+        "minHeight": 415,
         "maxHeight": 100000
       }
     ],
@@ -55,7 +55,8 @@
     "theme": "uv-en-GB-theme",
     "tokenStorage": "session",
     "useArrowKeysToNavigate": false,
-    "zoomToSearchResultEnabled": true
+    "zoomToSearchResultEnabled": true,
+    "zoomToBoundsEnabled": false
   },
   "modules": {
     "contentLeftPanel": {

@@ -36,15 +36,15 @@ export class AVCenterPanel extends CenterPanel {
             }
         });
 
-        $.subscribe(BaseEvents.RANGE_CHANGED, (e: any, range: Manifesto.IRange) => {
+        $.subscribe(BaseEvents.RANGE_CHANGED, (e: any, range: Manifesto.IRange | null) => {
             that._viewRange(range);
             that._setTitle();
         });
 
         $.subscribe(BaseEvents.METRIC_CHANGED, () => {
             this.avcomponent.set({
-                limitToRange: !this.extension.isDesktopMetric(),
-                constrainNavigationToRange: true
+                limitToRange: this._limitToRange(),
+                constrainNavigationToRange: this._limitToRange()
             });
         });
 
@@ -63,20 +63,31 @@ export class AVCenterPanel extends CenterPanel {
             this._canvasReady = true;
         }, false);
 
-        this.avcomponent.on('previousrange', () => {
-            this._setTitle();
-            $.publish(BaseEvents.RANGE_CHANGED, [this.extension.helper.getCurrentRange()]);
+        this.avcomponent.on('rangechanged', (rangeId: string | null) => {        
+            
+            if (rangeId) {
+
+                this._setTitle();
+
+                const range: Manifesto.IRange | null = this.extension.helper.getRangeById(rangeId);
+
+                if (range) {
+                    const currentRange: Manifesto.IRange | null = this.extension.helper.getCurrentRange();
+
+                    if (range !== currentRange) {
+                        $.publish(BaseEvents.RANGE_CHANGED, [range]);
+                    }
+                    
+                } else {
+                    $.publish(BaseEvents.RANGE_CHANGED, [null]);
+                }
+
+            } else {
+                $.publish(BaseEvents.RANGE_CHANGED, [null]);
+            } 
+            
         }, false);
 
-        this.avcomponent.on('nextrange', () => {
-            this._setTitle();
-            $.publish(BaseEvents.RANGE_CHANGED, [this.extension.helper.getCurrentRange()]);
-        }, false);
-
-        this.avcomponent.on('norange', () => {
-            this._setTitle();
-            $.publish(BaseEvents.NO_RANGE);
-        }, false);
     }
 
     private _setTitle(): void {
@@ -126,8 +137,10 @@ export class AVCenterPanel extends CenterPanel {
             this.avcomponent.set({
                 helper: this.extension.helper,
                 autoPlay: this.config.options.autoPlay,
+                autoSelectRange: true,
                 defaultAspectRatio: 0.56,
-                limitToRange: false,
+                limitToRange: this._limitToRange(),
+                constrainNavigationToRange: this._limitToRange(),
                 doubleClickMS: 350,
                 content: this.content
             });
@@ -136,23 +149,21 @@ export class AVCenterPanel extends CenterPanel {
         });
     }
 
-    private _viewRange(range: Manifesto.IRange): void {
+    private _limitToRange(): boolean {
+        return !this.extension.isDesktopMetric();
+    }
 
-        if (!range.canvases || !range.canvases.length) return;
+    private _viewRange(range: Manifesto.IRange | null): void {
 
-        const canvasId: string = range.canvases[0];
-        const canvas: Manifesto.ICanvas | null = this.extension.helper.getCanvasById(canvasId);
-
-        if (canvas) {
-
-            Utils.Async.waitFor(() => {
-                return this._canvasReady;
-            }, () => {
-                this.avcomponent.playCanvas(canvasId);
-                this.resize();
-            });
+        Utils.Async.waitFor(() => {
+            return this._canvasReady;
+        }, () => {
+            if (range) {
+                this.avcomponent.playRange(range.id);
+            }
             
-        }
+            this.resize();
+        });
     }
 
     viewCanvas(canvasIndex: number): void {
