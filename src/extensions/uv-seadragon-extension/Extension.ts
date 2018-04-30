@@ -888,10 +888,8 @@ export class Extension extends BaseExtension implements ISeadragonExtension {
     }
 
     getEmbedScript(template: string, width: number, height: number, zoom: string, rotation: number): string {
-        const config: string = this.data.config.uri || '';
-        const locales: string = this.getSerializedLocales();
         const appUri: string = this.getAppUri();
-        const iframeSrc: string = `${appUri}#?manifest=${this.helper.iiifResourceUri}&c=${this.helper.collectionIndex}&m=${this.helper.manifestIndex}&s=${this.helper.sequenceIndex}&cv=${this.helper.canvasIndex}&config=${config}&locales=${locales}&xywh=${zoom}&r=${rotation}`;
+        const iframeSrc: string = `${appUri.replace(/(\/uv-3.*)?\/uv.html/, '/iframe')}?url=${this.helper.iiifResourceUri.replace('/iiif/manifest', '')}`;
         const script: string = Utils.Strings.format(template, iframeSrc, width.toString(), height.toString());
         return script;
     }
