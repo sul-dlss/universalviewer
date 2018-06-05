@@ -39,6 +39,11 @@ export default class UVComponent extends _Components.BaseComponent implements IU
             name: 'uv-seadragon-extension'
         };
 
+        this._extensions[manifesto.ResourceType.image().toString()] = {
+            type: OpenSeadragonExtension,
+            name: 'uv-seadragon-extension'
+        };
+
         this._extensions[manifesto.ResourceType.movingimage().toString()] = {
             type: MediaElementExtension,
             name: 'uv-mediaelement-extension'
@@ -250,7 +255,7 @@ export default class UVComponent extends _Components.BaseComponent implements IU
                     const annotation: Manifesto.IAnnotation = content[0];
                     const body: Manifesto.IAnnotationBody[] = annotation.getBody();
 
-                    if (body) {
+                    if (body && body.length) {
                         const format: Manifesto.MediaType | null = body[0].getFormat();
 
                         if (format) {
@@ -263,6 +268,12 @@ export default class UVComponent extends _Components.BaseComponent implements IU
                                 if (type) {
                                     extension = that._extensions[type.toString()];
                                 }
+                            }
+                        } else {
+                            const type: Manifesto.ResourceType | null = body[0].getType();
+
+                            if (type) {
+                                extension = that._extensions[type.toString()];
                             }
                         }
                     }
@@ -323,11 +334,12 @@ export default class UVComponent extends _Components.BaseComponent implements IU
     private _extendConfig(data: IUVData, extension: any, config: any, configExtension: any, cb: (config: any) => void): void {
         config.name = extension.name;
 
-        // if data-config has been set, extend the existing config object.
+        // if configUri has been set, extend the existing config object.
         if (configExtension) {
             // save a reference to the config extension uri.
             config.uri = data.configUri;
             $.extend(true, config, configExtension);
+            //$.extend(true, config, configExtension, data.config);
         }
 
         cb(config);
@@ -340,7 +352,7 @@ export default class UVComponent extends _Components.BaseComponent implements IU
 
         if (sessionConfig) { // if config is stored in sessionstorage
             cb(JSON.parse(sessionConfig));
-        } else if (configUri) { // if data-config has been set
+        } else if (configUri) { // if data.configUri has been set
 
             if (this._isCORSEnabled()) {
                 $.getJSON(configUri, (configExtension) => {
